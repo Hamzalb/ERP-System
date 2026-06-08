@@ -19,7 +19,7 @@ interface NavItem {
 }
 
 const navigation: NavItem[] = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   {
     label: 'HR',
     icon: UserCheck,
@@ -46,14 +46,7 @@ const navigation: NavItem[] = [
       { label: 'Quotations', href: '/sales/quotations', icon: FileText },
     ],
   },
-  {
-    label: 'Purchases',
-    icon: CreditCard,
-    children: [
-      { label: 'Suppliers', href: '/purchases/suppliers', icon: Building2 },
-      { label: 'Purchase Orders', href: '/purchases/orders', icon: Package },
-    ],
-  },
+  { label: 'Purchases', href: '/purchases', icon: CreditCard },
   {
     label: 'Inventory',
     icon: Boxes,
@@ -63,15 +56,7 @@ const navigation: NavItem[] = [
       { label: 'Warehouses', href: '/inventory/warehouses', icon: Building2 },
     ],
   },
-  {
-    label: 'Accounting',
-    icon: BookOpen,
-    children: [
-      { label: 'Chart of Accounts', href: '/accounting/accounts', icon: BookOpen },
-      { label: 'Journal Entries', href: '/accounting/journal', icon: FileText },
-      { label: 'Reports', href: '/accounting/reports', icon: BarChart3 },
-    ],
-  },
+  { label: 'Accounting', href: '/accounting', icon: BookOpen },
   { label: 'Projects', href: '/projects', icon: Briefcase },
   { label: 'Reports', href: '/reports', icon: BarChart3 },
   { label: 'Notifications', href: '/notifications', icon: Bell },
@@ -95,7 +80,11 @@ interface SidebarProps {
 
 function NavGroup({ item, level = 0 }: { item: NavItem; level?: number }) {
   const pathname = usePathname();
-  const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
+  const isActive = item.href
+    ? item.href === '/dashboard'
+      ? pathname === '/dashboard'
+      : pathname === item.href || pathname.startsWith(item.href + '/')
+    : false;
   const hasActiveChild = item.children?.some((c) => c.href && (pathname === c.href || pathname.startsWith(c.href + '/')));
   const [expanded, setExpanded] = useState(hasActiveChild || false);
   const Icon = item.icon;
