@@ -30,14 +30,19 @@ api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
     const original = error.config as AxiosRequestConfig & { _retry?: boolean };
-    if (error.response?.status === 401 && !original._retry) {
+    const url = original?.url ?? '';
+
+    // Never attempt token refresh for auth endpoints — avoids infinite loops
+    const isAuthEndpoint = url.includes('/auth/refresh') || url.includes('/auth/login') || url.includes('/auth/logout');
+
+    if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         }).then((token) => {
           if (original.headers) original.headers.Authorization = `Bearer ${token}`;
           return api(original);
-        });
+        }).catch((err) => Promise.reject(err));
       }
 
       original._retry = true;
@@ -52,7 +57,10 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError as AxiosError, null);
         accessToken = null;
-        if (typeof window !== 'undefined') window.location.href = '/login';
+        // Only redirect if not already on an auth page
+        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/forgot')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

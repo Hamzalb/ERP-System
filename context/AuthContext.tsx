@@ -5,10 +5,11 @@ import { toast } from 'sonner';
 import api, { setAccessToken, apiPost } from '@/lib/api';
 
 interface UserProfile {
-  _id: string;
+  id?: string;   // from login endpoint
+  _id?: string;  // from /users/me endpoint
   name: string;
   email: string;
-  roles: { name: string }[];
+  roles?: { name: string }[];
   avatar?: string;
 }
 
@@ -41,10 +42,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Try to refresh token on mount (cookie-based, httpOnly)
+    // Try to restore session from httpOnly refresh token cookie
     api.post('/auth/refresh')
       .then((res) => {
-        const token = (res.data as any).data?.accessToken;
+        const token = (res.data as any)?.data?.accessToken;
         if (token) {
           setAccessToken(token);
           fetchMe();
@@ -53,9 +54,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       })
       .catch(() => {
+        // No valid session — show login, never block the UI
         setState({ user: null, isLoading: false, isAuthenticated: false });
       });
-  }, [fetchMe]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await apiPost<{ accessToken: string; user: UserProfile }>('/auth/login', { email, password });
