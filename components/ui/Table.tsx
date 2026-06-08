@@ -23,15 +23,15 @@ export function Table<T extends Record<string, unknown>>({
   columns, data, keyField = '_id', loading, emptyMessage = 'No data found', className, onRowClick,
 }: TableProps<T>) {
   return (
-    <div className={cn('overflow-x-auto rounded-xl border border-slate-200', className)}>
+    <div className={cn('overflow-x-auto rounded-2xl border border-slate-200/80 bg-white card-depth', className)}>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-100 bg-slate-50">
+          <tr className="border-b border-slate-100" style={{ background: 'linear-gradient(to right, #f8fafc, #f1f5f9)' }}>
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={cn(
-                  'px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap',
+                  'px-4 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap',
                   col.className,
                   col.width && `w-[${col.width}]`,
                 )}
@@ -41,21 +41,26 @@ export function Table<T extends Record<string, unknown>>({
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-slate-50">
+        <tbody className="divide-y divide-slate-50">
           {loading ? (
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={i}>
                 {columns.map((col) => (
-                  <td key={col.key} className="px-4 py-3">
-                    <div className="h-4 bg-slate-100 rounded animate-pulse" style={{ width: `${60 + Math.random() * 30}%` }} />
+                  <td key={col.key} className="px-4 py-3.5">
+                    <div className="h-4 bg-slate-100 rounded-lg animate-pulse" style={{ width: `${60 + (i * 7) % 30}%` }} />
                   </td>
                 ))}
               </tr>
             ))
           ) : data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-12 text-center text-slate-400">
-                {emptyMessage}
+              <td colSpan={columns.length} className="px-4 py-16 text-center">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
+                    <span className="text-2xl text-slate-300">∅</span>
+                  </div>
+                  <p className="text-slate-400 text-sm">{emptyMessage}</p>
+                </div>
               </td>
             </tr>
           ) : (
@@ -63,10 +68,10 @@ export function Table<T extends Record<string, unknown>>({
               <tr
                 key={String(row[keyField])}
                 onClick={() => onRowClick?.(row)}
-                className={cn('hover:bg-slate-50 transition-colors', onRowClick && 'cursor-pointer')}
+                className={cn('table-row-hover', onRowClick && 'cursor-pointer')}
               >
                 {columns.map((col) => (
-                  <td key={col.key} className={cn('px-4 py-3 text-slate-700', col.className)}>
+                  <td key={col.key} className={cn('px-4 py-3.5 text-slate-700', col.className)}>
                     {col.render ? col.render(row[col.key], row) : String(row[col.key] ?? '')}
                   </td>
                 ))}
@@ -91,19 +96,19 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
-        className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
+        className="px-3.5 py-1.5 text-sm font-medium rounded-xl border-2 border-slate-200 bg-white text-slate-600 disabled:opacity-40 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-150"
       >
-        Previous
+        ← Previous
       </button>
-      <span className="text-sm text-slate-600">
-        Page {page} of {totalPages}
+      <span className="text-sm text-slate-500 tabular px-1">
+        Page <span className="font-semibold text-slate-900">{page}</span> of <span className="font-semibold text-slate-900">{totalPages}</span>
       </span>
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
-        className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
+        className="px-3.5 py-1.5 text-sm font-medium rounded-xl border-2 border-slate-200 bg-white text-slate-600 disabled:opacity-40 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-150"
       >
-        Next
+        Next →
       </button>
     </div>
   );

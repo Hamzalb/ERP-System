@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { AuthProvider } from '@/context/AuthContext';
 import './globals.css';
 
 const inter = Inter({
@@ -19,8 +20,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} h-full`}>
       <body className="h-full antialiased">
-        {children}
-        <Toaster richColors position="top-right" closeButton />
+        <AuthProvider>
+          {children}
+          <Toaster richColors position="top-right" closeButton />
+        </AuthProvider>
       </body>
     </html>
   );

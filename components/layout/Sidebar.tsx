@@ -5,10 +5,11 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Users, UserCheck, Building2, Clock, Calendar,
   DollarSign, PhoneCall, ShoppingCart, Package, BarChart3, Briefcase,
-  Bell, FolderOpen, FileText, Search, Shield, Settings, ChevronDown,
-  ChevronRight, X, Boxes, CreditCard, BookOpen, LogOut,
+  Bell, FolderOpen, FileText, Shield, Settings, ChevronDown,
+  ChevronRight, X, Boxes, CreditCard, BookOpen, LogOut, Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 interface NavItem {
   label: string;
@@ -59,7 +60,7 @@ const navigation: NavItem[] = [
   { label: 'Accounting', href: '/accounting', icon: BookOpen },
   { label: 'Projects', href: '/projects', icon: Briefcase },
   { label: 'Reports', href: '/reports', icon: BarChart3 },
-  { label: 'Notifications', href: '/notifications', icon: Bell },
+  { label: 'Notifications', href: '/notifications', icon: Bell, badge: 3 },
   { label: 'Files', href: '/files', icon: FolderOpen },
   {
     label: 'Admin',
@@ -85,8 +86,10 @@ function NavGroup({ item, level = 0 }: { item: NavItem; level?: number }) {
       ? pathname === '/dashboard'
       : pathname === item.href || pathname.startsWith(item.href + '/')
     : false;
-  const hasActiveChild = item.children?.some((c) => c.href && (pathname === c.href || pathname.startsWith(c.href + '/')));
-  const [expanded, setExpanded] = useState(hasActiveChild || false);
+  const hasActiveChild = item.children?.some(
+    (c) => c.href && (pathname === c.href || pathname.startsWith(c.href + '/')),
+  );
+  const [expanded, setExpanded] = useState(hasActiveChild ?? false);
   const Icon = item.icon;
 
   if (item.children) {
@@ -95,23 +98,21 @@ function NavGroup({ item, level = 0 }: { item: NavItem; level?: number }) {
         <button
           onClick={() => setExpanded((p) => !p)}
           className={cn(
-            'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
+            'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all duration-200',
             hasActiveChild
-              ? 'text-indigo-700 bg-indigo-50'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+              ? 'text-white/90 bg-white/10'
+              : 'text-white/50 hover:text-white/80 hover:bg-white/8',
           )}
           aria-expanded={expanded}
         >
           <Icon className="w-4 h-4 flex-shrink-0" />
           <span className="flex-1 text-left font-medium">{item.label}</span>
-          {expanded ? (
-            <ChevronDown className="w-3.5 h-3.5" />
-          ) : (
-            <ChevronRight className="w-3.5 h-3.5" />
-          )}
+          {expanded
+            ? <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+            : <ChevronRight className="w-3.5 h-3.5 opacity-60" />}
         </button>
         {expanded && (
-          <div className="ml-3 mt-0.5 pl-3 border-l border-slate-100 space-y-0.5">
+          <div className="mt-0.5 ml-3 pl-4 border-l border-white/10 space-y-0.5">
             {item.children.map((child) => (
               <NavGroup key={child.label} item={child} level={level + 1} />
             ))}
@@ -125,16 +126,16 @@ function NavGroup({ item, level = 0 }: { item: NavItem; level?: number }) {
     <Link
       href={item.href!}
       className={cn(
-        'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
+        'flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 relative',
         isActive
-          ? 'bg-indigo-600 text-white font-medium shadow-sm'
-          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+          ? 'nav-active text-white font-medium'
+          : 'text-white/50 hover:text-white/90 hover:bg-white/8',
       )}
     >
-      <Icon className="w-4 h-4 flex-shrink-0" />
+      <Icon className={cn('w-4 h-4 flex-shrink-0', isActive && 'drop-shadow-sm')} />
       <span className="flex-1">{item.label}</span>
       {item.badge && (
-        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+        <span className="bg-indigo-400/30 border border-indigo-400/40 text-indigo-200 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
           {item.badge}
         </span>
       )}
@@ -143,12 +144,14 @@ function NavGroup({ item, level = 0 }: { item: NavItem; level?: number }) {
 }
 
 export function Sidebar({ open, onClose }: SidebarProps) {
+  const { logout, user } = useAuth();
+
   return (
     <>
       {/* Mobile overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
@@ -156,26 +159,36 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-slate-200',
+          'fixed top-0 left-0 z-50 h-full w-64 mesh-dark',
           'flex flex-col transition-transform duration-200 ease-out',
           'lg:translate-x-0 lg:z-30',
           open ? 'translate-x-0' : '-translate-x-full',
         )}
+        style={{
+          background: 'linear-gradient(180deg, #0f172a 0%, #1e1b4b 60%, #1e1b4b 100%)',
+          boxShadow: '4px 0 24px rgba(0,0,0,.3)',
+        }}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-[60px] px-4 border-b border-slate-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Boxes className="w-4.5 h-4.5 text-white" />
+        <div className="flex items-center justify-between h-[60px] px-4 border-b border-white/[0.06]">
+          <div className="flex items-center gap-3">
+            {/* 3D logo mark */}
+            <div className="relative w-9 h-9">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center animate-pulse-glow"
+                style={{ background: 'linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)', boxShadow: '0 4px 12px rgba(99,102,241,.5)' }}
+              >
+                <Sparkles className="w-4.5 h-4.5 text-white" />
+              </div>
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-900 leading-tight">ERP System</p>
-              <p className="text-[10px] text-slate-400 leading-tight">Enterprise Suite</p>
+              <p className="text-sm font-bold text-white leading-tight tracking-tight">ERP System</p>
+              <p className="text-[10px] text-indigo-400 leading-tight">Enterprise Suite</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="lg:hidden w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+            className="lg:hidden w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10"
             aria-label="Close sidebar"
           >
             <X className="w-4 h-4" />
@@ -183,18 +196,33 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 overflow-y-auto no-scrollbar space-y-0.5">
+        <nav className="flex-1 px-3 py-3 overflow-y-auto no-scrollbar space-y-0.5">
           {navigation.map((item) => (
             <NavGroup key={item.label} item={item} />
           ))}
         </nav>
 
-        {/* Bottom: logout */}
-        <div className="px-3 py-3 border-t border-slate-100">
-          <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors">
+        {/* Bottom divider + version */}
+        <div className="px-3 py-3 border-t border-white/[0.06]">
+          {user && (
+            <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-white/80 truncate">{user.name}</p>
+                <p className="text-[10px] text-white/30 truncate">{user.email}</p>
+              </div>
+            </div>
+          )}
+          <button
+            onClick={logout}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200"
+          >
             <LogOut className="w-4 h-4" />
             <span>Sign out</span>
           </button>
+          <p className="mt-2 text-center text-[10px] text-white/15 font-mono">v1.0.0 · Enterprise</p>
         </div>
       </aside>
     </>
